@@ -6,6 +6,11 @@ Node and React, separating out the UI elements from the Complete Guide into a Re
 and makes use of REST APIs, JWT, async-await, and websockets to emit updates to other instances
 of the app.
 
+## Releases
+
+The node-react-rest release contains examples of using MongoDB with REST, while
+the node-react-graphql release contains examples of using MongoDB with GraphQL.
+
 ## Installing MongoDB
 
 https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-os-x/
