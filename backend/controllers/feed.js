@@ -3,11 +3,10 @@ const path = require('path');
 
 const { validationResult } = require('express-validator');
 
-// websockets
-const io = require('../socket');
-
 const Post = require('../models/post');
 const User = require('../models/user');
+
+const clearImage = require('../util/file');
 
 exports.getPosts = async (req, res, next) => {
   const currentPage = req.query.page || 1;
@@ -57,14 +56,6 @@ exports.createPost = async (req, res, next) => {
     const user = await User.findById(req.userId);
     user.posts.push(post);
     await user.save();
-
-    // websockets
-    // emit an event to listeners, e.g. Feed.js:componentDidMount on the frontend
-    io.getIO().emit('posts', {
-      action: 'create',
-      post: { ...post._doc, creator: { _id: req.userId, name: user.name }}
-    });
-
     res.status(201).json({
       message: 'Post created successfully!',
       post,
@@ -134,10 +125,6 @@ exports.updatePost = async (req, res, next) => {
     post.imageUrl = imageUrl;
     post.content = content;
     const result = await post.save();
-
-    // websockets
-    io.getIO().emit('posts', { action: 'update', post: result });
-
     res.status(200).json({ message: 'Post updated.', post: result });
   } catch (err) {
     if (!err.statusCode) {
@@ -166,10 +153,6 @@ exports.deletePost = async (req, res, next) => {
     const user = await  User.findById(req.userId);
     user.posts.pull(postId);
     await user.save();
-
-    // websockets
-    io.getIO().emit('posts', { action: 'delete', post: postId });
-
     res.status(200).json({ message: 'Post deleted.' });
   } catch (err) {
     if (!err.statusCode) {
@@ -178,8 +161,3 @@ exports.deletePost = async (req, res, next) => {
     next(err);
   }
 };
-
-const clearImage = (filePath) => {
-  filePath = path.join(__dirname, '..', filePath);
-  fs.unlink(filePath, err => console.log(err));
-}
